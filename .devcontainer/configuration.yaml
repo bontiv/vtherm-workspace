@@ -1,0 +1,142 @@
+# Development configuration of Home Assistant, copied into config/ when the container is created.
+# Once copied, config/configuration.yaml can be edited freely (config/ is ignored by git).
+# The custom components of all the projects are linked into config/custom_components by .devcontainer/link-components.sh.
+
+homeassistant:
+  name: VTherm Workspace
+  unit_system: metric
+  time_zone: Europe/Paris
+  country: FR
+  language: en
+
+# default_config is intentionally NOT used: it pulls in go2rtc, which needs a Docker binary that the container does not have.
+# Only the components needed for development are listed.
+frontend:
+  # The Lovelace cards of the workspace, linked into config/www/community by link-components.sh (served as /local/community/...).
+  extra_module_url:
+    - /local/community/versatile-thermostat-ui-card/versatile-thermostat-ui-card.js
+    - /local/community/auto-tpi-learning-card/auto-tpi-learning-card.js
+config:
+# Without it, the links /_my_redirect/... that the add-ons pages use answer 404.
+my:
+history:
+logbook:
+system_health:
+energy:
+
+# The `climate.hvac` entity supports the modes off, heat, cool, auto, dry and fan_only: use it as the underlying of an over_climate
+# VTherm to test the auto-start/stop mode.
+demo:
+
+recorder:
+  auto_purge: true
+  purge_keep_days: 1
+  commit_interval: 5
+
+logger:
+  default: warning
+  logs:
+    custom_components.versatile_thermostat: debug
+    custom_components.vtherm_dashboard: debug
+    custom_components.vtherm_quirks: debug
+    custom_components.vtherm_auto_fan_extended: debug
+    custom_components.vtherm_heating_failure_detection: debug
+    custom_components.vtherm_climate_replication: debug
+    custom_components.vtherm_smartpi: debug
+    custom_components.vtherm_hysteresis: debug
+    custom_components.vtherm_pellet_stove: debug
+    custom_components.vtherm_inhibition: debug
+    custom_components.heating_simulator: debug
+    vtherm_api: debug
+
+# Debugger: attach VS Code with the launch configuration "Home Assistant: attach" (port 5678, forwarded by the devcontainer).
+# Documentation: https://www.home-assistant.io/integrations/debugpy/
+debugpy:
+  start: true
+  wait: false
+  port: 5678
+
+# Entities to create VTherm thermostats without hardware.
+input_boolean:
+  fake_heater_switch1:
+    name: Heater 1
+    icon: mdi:radiator
+  fake_heater_switch2:
+    name: Heater 2
+    icon: mdi:radiator
+  fake_heater_switch3:
+    name: Heater 3
+    icon: mdi:radiator
+  fake_heater_ac1:
+    name: Air conditioner 1
+    icon: mdi:air-conditioner
+  fake_window_sensor1:
+    name: Window 1
+    icon: mdi:window-closed-variant
+  fake_motion_sensor1:
+    name: Motion sensor 1
+    icon: mdi:run
+  fake_presence_sensor1:
+    name: Presence sensor 1
+    icon: mdi:home
+  fake_central_boiler_switch:
+    name: Central boiler switch
+    icon: mdi:water-boiler
+  inhibition:
+    name: Inhibition
+    icon: mdi:pause-circle-outline
+
+input_number:
+  fake_temperature_sensor1:
+    name: Temperature
+    min: 0
+    max: 35
+    step: 0.1
+    initial: 19
+    icon: mdi:thermometer
+    unit_of_measurement: "°C"
+    mode: box
+  fake_external_temperature_sensor1:
+    name: Outdoor temperature
+    min: -10
+    max: 35
+    step: 0.1
+    initial: 10
+    icon: mdi:home-thermometer
+    unit_of_measurement: "°C"
+    mode: box
+  fake_current_power:
+    name: Current power
+    min: 0
+    max: 1000
+    step: 10
+    icon: mdi:flash
+    unit_of_measurement: W
+  fake_current_power_max:
+    name: Maximum power
+    min: 0
+    max: 1000
+    step: 10
+    icon: mdi:flash
+    unit_of_measurement: W
+  fake_valve1:
+    name: Valve 1
+    min: 0
+    max: 100
+    icon: mdi:pipe-valve
+    unit_of_measurement: "%"
+
+# Underlying thermostats driven by the fake heaters and the fake temperature.
+climate:
+  - platform: generic_thermostat
+    name: Underlying thermostat 1
+    heater: input_boolean.fake_heater_switch1
+    target_sensor: input_number.fake_temperature_sensor1
+  - platform: generic_thermostat
+    name: Underlying thermostat 2
+    heater: input_boolean.fake_heater_switch2
+    target_sensor: input_number.fake_temperature_sensor1
+  - platform: generic_thermostat
+    name: Underlying thermostat 3
+    heater: input_boolean.fake_heater_switch3
+    target_sensor: input_number.fake_temperature_sensor1

@@ -1,0 +1,112 @@
+{
+    "name": "Versatile Thermostat workspace",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "features": {
+        // Node 24 or later is needed by the dashboard (engines in its package.json): "lts" is 24 or later.
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "lts"
+        },
+        "ghcr.io/devcontainers/features/github-cli:1": {}
+    },
+
+    // The root of this repository, with all the projects as git submodules, is the one folder that the container sees.
+    // These two lines are what VS Code does by default. They are written out so that they can be changed in one place:
+    // to get the best disk performance on Windows, replace the bind mount by a named volume (see "Windows and WSL" in the README):
+    //   "workspaceMount": "source=vtherm-workspace-${devcontainerId},target=/workspaces/vtherm-workspace,type=volume"
+    //   "workspaceFolder": "/workspaces/vtherm-workspace"
+    // A bind mount keeps the sources on the host (editable and visible from the host, survives "Rebuild Container without cache"),
+    // `cached` allows the host to be slightly ahead on macOS. The name of the folder is kept, whatever the host path is.
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind,consistency=cached",
+    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+
+    "mounts": [
+        // Caches on named volumes of Docker: no path of the host, and they are kept when the container is rebuilt.
+        "type=volume,source=vtherm-workspace-pip-cache,target=/var/cache/vtherm/pip",
+        "type=volume,source=vtherm-workspace-npm-cache,target=/var/cache/vtherm/npm",
+        // node_modules on volumes of the container, not on the host folder: thousands of small files are slow through a bind mount.
+        "type=volume,source=vtherm-workspace-node-modules-${devcontainerId},target=${containerWorkspaceFolder}/vtherm_dashboard/node_modules",
+        "type=volume,source=vtherm-workspace-dashboard-frontend-node-modules-${devcontainerId},target=${containerWorkspaceFolder}/vtherm_dashboard/frontend/node_modules",
+        "type=volume,source=vtherm-workspace-ui-card-node-modules-${devcontainerId},target=${containerWorkspaceFolder}/versatile-thermostat-ui-card/node_modules"
+    ],
+
+    "forwardPorts": [
+        8123,
+        5198,
+        5678
+    ],
+    "portsAttributes": {
+        "8123": {
+            "label": "Home Assistant",
+            "onAutoForward": "notify"
+        },
+        // npm run dev in vtherm_dashboard: the browser imports the frontend of the dashboard from it (start-ha.sh --dev-frontend)
+        "5198": {
+            "label": "Dashboard frontend (Vite)",
+            "onAutoForward": "silent"
+        },
+        // The debugpy integration of Home Assistant (see .devcontainer/configuration.yaml)
+        "5678": {
+            "label": "Home Assistant debugger (debugpy)",
+            "onAutoForward": "silent"
+        }
+    },
+
+    "postCreateCommand": "bash .devcontainer/post-create.sh",
+
+    "containerEnv": {
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PIP_CACHE_DIR": "/var/cache/vtherm/pip",
+        "npm_config_cache": "/var/cache/vtherm/npm"
+    },
+
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.debugpy",
+                "ms-python.pylint",
+                "ms-python.black-formatter",
+                "redhat.vscode-yaml",
+                "keesschollaart.vscode-home-assistant",
+                "dbaeumer.vscode-eslint",
+                "esbenp.prettier-vscode",
+                "runem.lit-plugin",
+                "ryanluker.vscode-coverage-gutters",
+                "github.vscode-pull-request-github",
+                "github.vscode-github-actions",
+                "github.copilot",
+                "ms-azuretools.vscode-docker",
+                "yzhang.markdown-all-in-one",
+                "donjayamanne.githistory",
+                "waderyan.gitblame",
+                "huizhou.githd",
+                "ferrierbenjamin.fold-unfold-all-icone"
+            ],
+            "settings": {
+                "files.eol": "\n",
+                "editor.tabSize": 4,
+                "files.trimTrailingWhitespace": true,
+                "terminal.integrated.defaultProfile.linux": "bash",
+                "python.defaultInterpreterPath": "/usr/local/bin/python",
+                "python.testing.pytestEnabled": true,
+                "python.testing.unittestEnabled": false,
+                "python.testing.pytestArgs": ["-vv"],
+                "pylint.lintOnChange": false,
+                "black-formatter.args": ["--line-length", "180"],
+                "git.detectSubmodules": true,
+                "[python]": {
+                    "editor.defaultFormatter": "ms-python.black-formatter",
+                    "editor.formatOnSave": true
+                },
+                "[typescript]": {
+                    "editor.tabSize": 2
+                },
+                "[yaml]": {
+                    "editor.tabSize": 2
+                }
+            }
+        }
+    }
+}

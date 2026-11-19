@@ -1,0 +1,15 @@
+# Home Assistant development configuration, generated from .devcontainer/configuration.yaml
+/config/
+
+# Python
+.venv/
+__pycache__/
+.pytest_cache/
+*.egg-info/
+
+# Node
+node_modules/
+
+# Local files
+*.log
+.env

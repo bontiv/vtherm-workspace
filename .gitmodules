@@ -1,0 +1,56 @@
+[submodule "versatile_thermostat"]
+	path = versatile_thermostat
+	url = https://github.com/jmcollin78/versatile_thermostat.git
+	branch = main
+[submodule "vtherm_api"]
+	path = vtherm_api
+	url = https://github.com/jmcollin78/vtherm_api.git
+	branch = main
+[submodule "versatile-thermostat-ui-card"]
+	path = versatile-thermostat-ui-card
+	url = https://github.com/jmcollin78/versatile-thermostat-ui-card.git
+	branch = master
+[submodule "auto-tpi-learning-card"]
+	path = auto-tpi-learning-card
+	url = https://github.com/KipK/auto-tpi-learning-card.git
+	branch = main
+[submodule "vtherm_climate_replication"]
+	path = vtherm_climate_replication
+	url = https://github.com/jmcollin78/vtherm_climate_replication.git
+	branch = main
+[submodule "vtherm_smartpi"]
+	path = vtherm_smartpi
+	url = https://github.com/KipK/vtherm_smartpi.git
+	branch = master
+[submodule "heating-simulator"]
+	path = heating-simulator
+	url = https://github.com/caiusseverus/heating-simulator.git
+	branch = main
+[submodule "vtherm_hysteresis"]
+	path = vtherm_hysteresis
+	url = https://github.com/KipK/vtherm_hysteresis.git
+	branch = main
+[submodule "vtherm_pellet_stove"]
+	path = vtherm_pellet_stove
+	url = https://github.com/jmcollin78/vtherm_pellet_stove.git
+	branch = main
+[submodule "vtherm_auto_fan_extended"]
+	path = vtherm_auto_fan_extended
+	url = https://github.com/jmcollin78/vtherm_auto_fan_extended.git
+	branch = main
+[submodule "vtherm_heating_failure_detection"]
+	path = vtherm_heating_failure_detection
+	url = https://github.com/jmcollin78/vtherm_heating_failure_detection.git
+	branch = main
+[submodule "vtherm_inhibition"]
+	path = vtherm_inhibition
+	url = https://github.com/alexlenk/vtherm_inhibition.git
+	branch = main
+[submodule "vtherm_dashboard"]
+	path = vtherm_dashboard
+	url = https://github.com/bontiv/vtherm_dashboard.git
+	branch = master
+[submodule "vtherm_quirks"]
+	path = vtherm_quirks
+	url = https://github.com/bontiv/vtherm_quirks.git
+	branch = main

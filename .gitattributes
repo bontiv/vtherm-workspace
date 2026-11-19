@@ -1,0 +1,2 @@
+# Bash scripts and JSON must keep LF endings, also on Windows (a CRLF breaks `#!/usr/bin/env bash`).
+* text=auto eol=lf

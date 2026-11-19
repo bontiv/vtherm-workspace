@@ -1,0 +1,216 @@
+{
+    // Multi-root workspace: one folder per project, all paths relative to this file. Open it in VS Code (inside the dev container).
+    // When a project is added, add its folder here, in "files.exclude" and, if it has tests, in the "project" input.
+    "folders": [
+        { "name": "workspace", "path": "." },
+        { "name": "versatile_thermostat", "path": "versatile_thermostat" },
+        { "name": "vtherm_api", "path": "vtherm_api" },
+        { "name": "vtherm_dashboard", "path": "vtherm_dashboard" },
+        { "name": "vtherm_quirks", "path": "vtherm_quirks" },
+        { "name": "vtherm_climate_replication", "path": "vtherm_climate_replication" },
+        { "name": "vtherm_smartpi", "path": "vtherm_smartpi" },
+        { "name": "vtherm_hysteresis", "path": "vtherm_hysteresis" },
+        { "name": "vtherm_pellet_stove", "path": "vtherm_pellet_stove" },
+        { "name": "vtherm_auto_fan_extended", "path": "vtherm_auto_fan_extended" },
+        { "name": "vtherm_heating_failure_detection", "path": "vtherm_heating_failure_detection" },
+        { "name": "vtherm_inhibition", "path": "vtherm_inhibition" },
+        { "name": "heating-simulator", "path": "heating-simulator" },
+        { "name": "versatile-thermostat-ui-card", "path": "versatile-thermostat-ui-card" },
+        { "name": "auto-tpi-learning-card", "path": "auto-tpi-learning-card" }
+    ],
+    "settings": {
+        "files.eol": "\n",
+        "editor.tabSize": 4,
+        "files.trimTrailingWhitespace": true,
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.testing.pytestEnabled": true,
+        "python.testing.unittestEnabled": false,
+        "python.testing.pytestArgs": ["-vv"],
+        "pylint.lintOnChange": false,
+        "black-formatter.args": ["--line-length", "180"],
+        "[python]": {
+            "editor.defaultFormatter": "ms-python.black-formatter",
+            "editor.formatOnSave": true
+        },
+        "[typescript]": { "editor.tabSize": 2 },
+        "[yaml]": { "editor.tabSize": 2 },
+        "files.associations": { "configuration.yaml": "home-assistant" },
+        "git.detectSubmodules": true,
+        "python.analysis.exclude": ["**/node_modules", "vtherm_dashboard/external", "vtherm_dashboard/frontend", "vtherm_dashboard/docs"],
+        // The "workspace" folder is this repository. Its explorer, search and watcher skip the projects, which have their own folder.
+        // The patterns are relative to the root of each folder, so they do not hide anything inside a project.
+        "files.exclude": {
+            "versatile_thermostat": true,
+            "vtherm_api": true,
+            "vtherm_dashboard": true,
+            "vtherm_quirks": true,
+            "vtherm_climate_replication": true,
+            "vtherm_smartpi": true,
+            "vtherm_hysteresis": true,
+            "vtherm_pellet_stove": true,
+            "vtherm_auto_fan_extended": true,
+            "vtherm_heating_failure_detection": true,
+            "vtherm_inhibition": true,
+            "heating-simulator": true,
+            "versatile-thermostat-ui-card": true,
+            "auto-tpi-learning-card": true
+        },
+        "search.exclude": { "**/node_modules": true, "config/.storage": true, "config/home-assistant.log*": true },
+        "files.watcherExclude": { "**/node_modules/**": true, "config/.storage/**": true }
+    },
+    "extensions": {
+        "recommendations": [
+            "ms-python.python",
+            "ms-python.debugpy",
+            "ms-python.pylint",
+            "ms-python.black-formatter",
+            "redhat.vscode-yaml",
+            "keesschollaart.vscode-home-assistant",
+            "dbaeumer.vscode-eslint",
+            "esbenp.prettier-vscode",
+            "runem.lit-plugin",
+            "ryanluker.vscode-coverage-gutters",
+            "github.vscode-pull-request-github",
+            "github.vscode-github-actions",
+            "ms-azuretools.vscode-docker",
+            "yzhang.markdown-all-in-one"
+        ]
+    },
+    "tasks": {
+        "version": "2.0.0",
+        "tasks": [
+            {
+                "label": "Home Assistant: start",
+                "type": "shell",
+                "command": "bash .devcontainer/start-ha.sh",
+                "options": { "cwd": "${workspaceFolder:workspace}" },
+                "isBackground": true,
+                "problemMatcher": []
+            },
+            {
+                "label": "Home Assistant: start with the dashboard development server",
+                "type": "shell",
+                "command": "bash .devcontainer/start-ha.sh --dev-frontend",
+                "options": { "cwd": "${workspaceFolder:workspace}" },
+                "isBackground": true,
+                "problemMatcher": []
+            },
+            {
+                "label": "Home Assistant: stop",
+                "type": "shell",
+                "command": "bash .devcontainer/stop-ha.sh",
+                "options": { "cwd": "${workspaceFolder:workspace}" },
+                "problemMatcher": []
+            },
+            {
+                "label": "Home Assistant: restart",
+                "type": "shell",
+                "command": "bash .devcontainer/stop-ha.sh && bash .devcontainer/start-ha.sh",
+                "options": { "cwd": "${workspaceFolder:workspace}" },
+                "isBackground": true,
+                "problemMatcher": []
+            },
+            {
+                "label": "Home Assistant: follow the log",
+                "type": "shell",
+                "command": "tail -n 200 -F config/home-assistant.log",
+                "options": { "cwd": "${workspaceFolder:workspace}" },
+                "isBackground": true,
+                "problemMatcher": []
+            },
+            {
+                "label": "Home Assistant: link the custom components",
+                "type": "shell",
+                "command": "bash .devcontainer/link-components.sh",
+                "options": { "cwd": "${workspaceFolder:workspace}" },
+                "problemMatcher": []
+            },
+            {
+                "label": "Dashboard: frontend development server (Vite)",
+                "type": "shell",
+                "command": "npm run dev",
+                "options": { "cwd": "${workspaceFolder:vtherm_dashboard}" },
+                "isBackground": true,
+                "problemMatcher": []
+            },
+            {
+                "label": "Dashboard: build the frontend",
+                "type": "shell",
+                "command": "npm run build",
+                "options": { "cwd": "${workspaceFolder:vtherm_dashboard}" },
+                "problemMatcher": []
+            },
+            {
+                "label": "Dashboard: frontend tests (vitest)",
+                "type": "shell",
+                "command": "npm test",
+                "options": { "cwd": "${workspaceFolder:vtherm_dashboard}" },
+                "problemMatcher": []
+            },
+            {
+                "label": "Versatile Thermostat card: build",
+                "type": "shell",
+                "command": "npm run build",
+                "options": { "cwd": "${workspaceFolder:versatile-thermostat-ui-card}" },
+                "problemMatcher": []
+            },
+            {
+                "label": "Tests: pytest of a project",
+                "type": "shell",
+                "command": "bash .devcontainer/run-tests.sh ${input:project} ${input:pytestArgs}",
+                "options": { "cwd": "${workspaceFolder:workspace}" },
+                "group": "test",
+                "problemMatcher": []
+            }
+        ],
+        "inputs": [
+            {
+                "id": "project",
+                "type": "pickString",
+                "description": "Project to test",
+                "options": [
+                    "versatile_thermostat",
+                    "vtherm_api",
+                    "vtherm_dashboard",
+                    "vtherm_quirks",
+                    "vtherm_climate_replication",
+                    "vtherm_smartpi",
+                    "vtherm_hysteresis",
+                    "vtherm_pellet_stove",
+                    "vtherm_auto_fan_extended",
+                    "vtherm_heating_failure_detection",
+                    "vtherm_inhibition",
+                    "heating-simulator"
+                ],
+                "default": "versatile_thermostat"
+            },
+            {
+                "id": "pytestArgs",
+                "type": "promptString",
+                "description": "Arguments of pytest (empty for all the tests)",
+                "default": ""
+            }
+        ]
+    },
+    "launch": {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "name": "Home Assistant: launch with the debugger",
+                "type": "debugpy",
+                "request": "launch",
+                "module": "homeassistant",
+                "args": ["--debug", "-c", "${workspaceFolder:workspace}/config"],
+                "justMyCode": false,
+                "cwd": "${workspaceFolder:workspace}"
+            },
+            {
+                "name": "Home Assistant: attach (started by start-ha.sh)",
+                "type": "debugpy",
+                "request": "attach",
+                "connect": { "host": "localhost", "port": 5678 },
+                "justMyCode": false
+            }
+        ]
+    }
+}
