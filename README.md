@@ -43,8 +43,19 @@ git clone --recurse-submodules <url of this repository> vtherm-workspace
 code vtherm-workspace
 ```
 
-1. In VS Code: **Dev Containers: Reopen in Container**. The first build takes several minutes: `postCreateCommand` initialises the
-   submodules (`git submodule update --init --recursive`, a no-op after `--recurse-submodules`), installs the Python and Node
+> **The submodules must be fetched before you start the dev container.** If the project folders are empty (a clone without
+> `--recurse-submodules`), `post-create.sh` fails, for example on `pip install -e vtherm_api` ("neither `setup.py` nor `pyproject.toml` found").
+> After a plain `git clone`, run this on the host, before **Reopen in Container**:
+>
+> ```bash
+> git submodule update --init --recursive
+> ```
+>
+> If the container already failed, run the command, then **Dev Containers: Rebuild Container** (or `bash .devcontainer/post-create.sh`).
+> `git submodule status` must show no `-` in front of a project.
+
+1. In VS Code: **Dev Containers: Reopen in Container**. The first build takes several minutes: `postCreateCommand` runs
+   `git submodule update --init --recursive` again (a no-op when the submodules are already there), installs the Python and Node
    dependencies, and prepares `config/`. Read its output in the terminal if something fails: a failing install is a warning, not a stop.
 2. **File > Open Workspace from File...** and choose `vtherm.code-workspace`. Each project becomes a folder, with the common settings,
    the recommended extensions, the tasks and the launch configurations.
@@ -136,7 +147,7 @@ that is not pushed: nobody else can fetch it.
 - **Speed.** Docker Desktop reads a Windows folder slowly. Clone this repository into the Linux file system of WSL 2
   (`\\wsl$\<distribution>\...`, or `~/` in a WSL terminal) and open it from there with VS Code, or use a named volume: replace
   `workspaceMount` and `workspaceFolder` as shown in the comment of `devcontainer.json`, then run **Dev Containers: Clone Repository in Container Volume...**
-  with the URL of this repository (`postCreateCommand` initialises the submodules).
+  with the URL of this repository (this clones without the submodules: see the note in *Get started* if `post-create.sh` fails).
 - **Symbolic links.** The scripts create links in the workspace (`config/custom_components/...`, `vtherm_dashboard/external/...`). Through
   a bind mount of a Windows folder, links made in the container may be unreadable from Windows, or fail. They work in WSL 2 and in a volume.
 - **Long paths.** If the clone fails with "Filename too long": `git config --global core.longpaths true`.
