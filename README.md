@@ -33,7 +33,7 @@ The dev container of Versatile Thermostat gives paths on the computer of its aut
 ## Requirements
 
 - Docker (Docker Desktop, or Docker Engine) and VS Code with the extension **Dev Containers**.
-- git 2.x. On Windows, run `git config --global core.autocrlf input` (or leave the default): `.gitattributes` forces LF anyway.
+- git 2.x. On Windows, run `git config --global core.autocrlf input` **before** cloning: `.gitattributes` forces LF in this repository only, not in the submodules (see [Windows and WSL](#windows-and-wsl)).
 - About 10 GB of disk space and 8 GB of memory for Docker: Home Assistant, Node and the dependencies of all the projects.
 
 ## Get started
@@ -142,8 +142,18 @@ that is not pushed: nobody else can fetch it.
 
 ### Windows and WSL
 
-- **Line endings.** Bash scripts must have LF. `.gitattributes` makes this repository use LF. A project that has no such file may check
-  out CRLF with `core.autocrlf=true`, which breaks its shell scripts in the container: run `git config core.autocrlf input` before the clone.
+- **Line endings.** Bash scripts must have LF. `.gitattributes` makes this repository use LF, but it does not apply to the submodules. With
+  `core.autocrlf=true` (the default of Git for Windows), a submodule is checked out with CRLF, which breaks its shell scripts in the
+  container. Run `git config --global core.autocrlf input` **before** `git clone --recurse-submodules`.
+- **Hundreds of changes in `git status` inside the container.** The files of the submodules have CRLF on disk, while their index has LF, and
+  the git of the container does not convert: it sees every file as modified (the same number of lines added and removed). `post-create.sh`
+  sets `core.autocrlf=input` in the container, which hides the difference without changing the files. A new terminal may need
+  `git config --global core.autocrlf input` if you did not run `post-create.sh`. To get LF on disk too, set `core.autocrlf=input` on
+  Windows, then in each submodule: `git rm --cached -r -q . && git reset --hard` (this discards the uncommitted changes of the submodule).
+- **"Default interpreter path ... could not be resolved".** A project can name its own interpreter in its `.vscode/settings.json`
+  (`vtherm_pellet_stove` names `/workspaces/vtherm_pellet_stove/.venv/bin/python`), and VS Code gives the settings of a folder priority over
+  the ones of `vtherm.code-workspace`. `post-create.sh` links that path to the interpreter of the container, without changing the
+  project. If the warning stays, run `bash .devcontainer/post-create.sh` and reload the window (**Developer: Reload Window**).
 - **Speed.** Docker Desktop reads a Windows folder slowly. Clone this repository into the Linux file system of WSL 2
   (`\\wsl$\<distribution>\...`, or `~/` in a WSL terminal) and open it from there with VS Code, or use a named volume: replace
   `workspaceMount` and `workspaceFolder` as shown in the comment of `devcontainer.json`, then run **Dev Containers: Clone Repository in Container Volume...**
@@ -158,6 +168,9 @@ that is not pushed: nobody else can fetch it.
 
 - Plugin tests may need packages that are missing from their requirements files, or a version of Home Assistant that differs from the one
   pinned by Versatile Thermostat. Install what is missing in the container, and fix the requirements file of the project.
+- `pytest-homeassistant-custom-component`, which several projects use for their tests, pins the Home Assistant that it was extracted from
+  (for example 2026.10.4), and its last release is often older than the one of Versatile Thermostat. `post-create.sh` installs it without
+  that pin, so `pip check` reports the difference, and its fixtures come from the older version.
 - `auto-tpi-learning-card` commits its `node_modules` and `dist`. The workspace serves its committed `dist/`; to rebuild it, run `npm run build`
   in the project, and expect a large diff.
 - The pip and npm caches, and the `node_modules` volumes, are Docker volumes: remove them with `docker volume ls` and

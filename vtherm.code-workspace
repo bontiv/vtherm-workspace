@@ -36,7 +36,17 @@
         "[yaml]": { "editor.tabSize": 2 },
         "files.associations": { "configuration.yaml": "home-assistant" },
         "git.detectSubmodules": true,
-        "python.analysis.exclude": ["**/node_modules", "vtherm_dashboard/external", "vtherm_dashboard/frontend", "vtherm_dashboard/docs"],
+        // Pylance indexes every folder of this workspace. The "workspace" folder contains all the projects, which are also folders of their
+        // own, and the links of config/custom_components and of */external lead to the same files again: without these patterns, each
+        // source file is read two to four times, and Pylance warns of "a large number of source files". The patterns are relative to the
+        // root of each folder: the names of the projects only apply to the "workspace" folder, where they are at the top level.
+        "python.analysis.exclude": [
+            "**/node_modules", "**/external", "**/.venv", "**/dist", "**/__pycache__", "config/custom_components",
+            "versatile_thermostat", "vtherm_api", "vtherm_dashboard", "vtherm_quirks", "vtherm_climate_replication", "vtherm_smartpi",
+            "vtherm_hysteresis", "vtherm_pellet_stove", "vtherm_auto_fan_extended", "vtherm_heating_failure_detection", "vtherm_inhibition",
+            "heating-simulator", "versatile-thermostat-ui-card", "auto-tpi-learning-card",
+            "vtherm_dashboard/frontend", "vtherm_dashboard/docs", "frontend", "docs"
+        ],
         // The "workspace" folder is this repository. Its explorer, search and watcher skip the projects, which have their own folder.
         // The patterns are relative to the root of each folder, so they do not hide anything inside a project.
         "files.exclude": {
