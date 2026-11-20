@@ -58,7 +58,10 @@
     "containerEnv": {
         "PYTHONDONTWRITEBYTECODE": "1",
         "PIP_CACHE_DIR": "/var/cache/vtherm/pip",
-        "npm_config_cache": "/var/cache/vtherm/npm"
+        "npm_config_cache": "/var/cache/vtherm/npm",
+        // Where the dashboard finds the projects it reads. VTHERM_HACS_DIR is not set: the workspace has no hacs folder, so HACS is fetched.
+        "VTHERM_VERSATILE_THERMOSTAT_DIR": "${containerWorkspaceFolder}/versatile_thermostat",
+        "VTHERM_API_DIR": "${containerWorkspaceFolder}/vtherm_api"
     },
 
     "customizations": {

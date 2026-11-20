@@ -170,18 +170,35 @@ for project in vtherm_dashboard versatile-thermostat-ui-card; do
 done
 
 # --- Dashboard tests ------------------------------------------------------------------------------------------------------------
-# The tests of the dashboard read Versatile Thermostat and vtherm_api from external/ (ignored by git in that project). Point them at the
-# submodules of this workspace instead of cloning them again. HACS, which has no submodule here, is fetched by its own script.
-mkdir -p vtherm_dashboard/external
-for name in versatile_thermostat vtherm_api; do
-    target="vtherm_dashboard/external/$name"
-    if [ -e "$target" ] && [ ! -L "$target" ]; then
-        echo "$target exists and is not a link, left as it is."
-    else
-        ln -sfn "../../$name" "$target"
-    fi
-done
-bash vtherm_dashboard/scripts/fetch-external.sh || warn "HACS was not fetched: the integration tests of the dashboard need it."
+# The tests of the dashboard find Versatile Thermostat and vtherm_api through VTHERM_VERSATILE_THERMOSTAT_DIR and VTHERM_API_DIR (set in
+# devcontainer.json to the submodules of this workspace). No link is created in external/. HACS, which has no submodule here, is fetched
+# by the script of the dashboard unless VTHERM_HACS_DIR points at a copy.
+FAILED=0
+
+# Remove the symbolic links that an earlier version of this script left directly inside a folder. Regular entries are not touched.
+# Returns 1 when a link could not be removed; the other entries are still processed.
+cleanup_external_links() {
+    local dir="$1" entry name status=0
+    [ -d "$dir" ] || return 0
+    while IFS= read -r -d '' entry; do
+        name="$(basename "$entry")"
+        if rm -- "$entry"; then
+            echo "Removed link $name"
+        else
+            echo "Could not remove link $name: removal failed" >&2
+            status=1
+        fi
+    done < <(find "$dir" -mindepth 1 -maxdepth 1 -type l -print0)
+    return "$status"
+}
+
+cleanup_external_links vtherm_dashboard/external || FAILED=1
+
+hacs_dir="${VTHERM_HACS_DIR:-}"
+if [ -z "${hacs_dir//[[:space:]]/}" ]; then
+    bash vtherm_dashboard/scripts/fetch-external.sh hacs \
+        || { echo "ERROR: fetching HACS failed: the integration tests of the dashboard need it." >&2; FAILED=1; }
+fi
 
 # --- Home Assistant -------------------------------------------------------------------------------------------------------------
 mkdir -p config
@@ -190,4 +207,8 @@ if [ ! -f config/configuration.yaml ]; then
 fi
 bash .devcontainer/link-components.sh
 
+if [ "$FAILED" != 0 ]; then
+    echo "Environment prepared with errors (see above). Start Home Assistant with: bash .devcontainer/start-ha.sh" >&2
+    exit 1
+fi
 echo "Environment ready. Start Home Assistant with: bash .devcontainer/start-ha.sh"

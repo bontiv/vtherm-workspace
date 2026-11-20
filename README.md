@@ -105,10 +105,18 @@ yours (`config/` is ignored by git). It has fake sensors, heaters and underlying
 - **Integrations are linked, not copied.** `.devcontainer/link-components.sh` reads `.gitmodules` and links every
   `<project>/custom_components/<domain>` (and the root of `heating-simulator`) into `config/custom_components`, and the `dist/` of the cards into
   `config/www/community/<card>`. Adding a project needs no change in this script.
-- **The dashboard tests use the workspace.** `vtherm_dashboard/external/versatile_thermostat` and `external/vtherm_api` are links to the submodules
-  (the dashboard ignores `external/` in git). HACS, which the dashboard tests also read, is fetched into `external/hacs` by the script of the dashboard.
+- **The dashboard tests use the workspace.** `external/` is not symlinked: no link or mount is created in it. The dashboard finds the
+  projects it reads through environment variables, which `devcontainer.json` sets in `containerEnv` (see the list below). HACS, which the
+  dashboard tests also read, has no variable here, so the script of the dashboard fetches it into its default location.
   The dashboard pins its own commit of Versatile Thermostat in `external-refs.txt` for its continuous integration. Here its tests run
   against the commit of the submodule, which may be newer.
+
+  Location variables set by the dev container:
+
+  - `VTHERM_VERSATILE_THERMOSTAT_DIR`: `${containerWorkspaceFolder}/versatile_thermostat` (the `versatile_thermostat` submodule).
+  - `VTHERM_API_DIR`: `${containerWorkspaceFolder}/vtherm_api` (the `vtherm_api` submodule).
+
+  `VTHERM_HACS_DIR` is not set: the workspace has no `hacs` folder.
 
 ### What was left out of the Versatile Thermostat container
 
@@ -158,7 +166,7 @@ that is not pushed: nobody else can fetch it.
   (`\\wsl$\<distribution>\...`, or `~/` in a WSL terminal) and open it from there with VS Code, or use a named volume: replace
   `workspaceMount` and `workspaceFolder` as shown in the comment of `devcontainer.json`, then run **Dev Containers: Clone Repository in Container Volume...**
   with the URL of this repository (this clones without the submodules: see the note in *Get started* if `post-create.sh` fails).
-- **Symbolic links.** The scripts create links in the workspace (`config/custom_components/...`, `vtherm_dashboard/external/...`). Through
+- **Symbolic links.** The scripts create links in the workspace (`config/custom_components/...`). Through
   a bind mount of a Windows folder, links made in the container may be unreadable from Windows, or fail. They work in WSL 2 and in a volume.
 - **Long paths.** If the clone fails with "Filename too long": `git config --global core.longpaths true`.
 - **Permissions.** With a bind mount, git in the container may say "dubious ownership": `post-create.sh` sets `safe.directory` for the
